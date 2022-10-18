@@ -2,6 +2,7 @@ import collections
 import contextlib
 import sys
 import wave
+import os
 
 import webrtcvad
 
@@ -66,7 +67,7 @@ def frame_generator(frame_duration_ms, audio, sample_rate):
 
 # =========================================
 
-_V_INTERVAL_FRAME = 22
+_V_INTERVAL_FRAME = 24
 _S_INTERVAL_FRAME = 33
 _keep = []
 _silence = []
@@ -103,11 +104,9 @@ def _pre_n_status(is_speech, frame):
         _keep.append(frame)
         if len(_silence) > _S_INTERVAL_FRAME:
             _voice_frames.append(_keep)
-            print("FRAMES: %d" % len(_voice_frames))
             _keep = []
             return "NULL"
         else:
-            print("")
             return "PRE_N"
     if is_speech == 1:
         _keep.append(frame)
@@ -122,7 +121,6 @@ def _pre_v_status(is_speech, frame):
         if len(_keep) > _V_INTERVAL_FRAME:
             return "VOICE"
         else:
-            print("")
             return "PRE_V"
     if is_speech == 0:
         _keep = []
@@ -144,99 +142,56 @@ def vad_dding(vad, frames, sample_rate):
         else:
             print("ERROR _status: %s" % _status)
 
-        print("%d %s" % (is_speech, _status), end=" ")
+def get_wave_files(wave_dir):
+    files = os.listdir(wave_dir)
+    print(files)
+    files = filter(lambda f: f[-4:] == ".wav", files)
+    files = list(files)
+    files = list(map(lambda f: os.path.join(wave_dir, f), files))
+    return files
 
-
-def vad_collector(sample_rate, frame_duration_ms,
-                  padding_duration_ms, vad, frames):
-    """Filters out non-voiced audio frames.
-
-    Given a webrtcvad.Vad and a source of audio frames, yields only
-    the voiced audio.
-
-    Uses a padded, sliding window algorithm over the audio frames.
-    When more than 90% of the frames in the window are voiced (as
-    reported by the VAD), the collector triggers and begins yielding
-    audio frames. Then the collector waits until 90% of the frames in
-    the window are unvoiced to detrigger.
-
-    The window is padded at the front and back to provide a small
-    amount of silence or the beginnings/endings of speech around the
-    voiced frames.
-
-    Arguments:
-
-    sample_rate - The audio sample rate, in Hz.
-    frame_duration_ms - The frame duration in milliseconds.
-    padding_duration_ms - The amount to pad the window, in milliseconds.
-    vad - An instance of webrtcvad.Vad.
-    frames - a source of audio frames (sequence or generator).
-
-    Returns: A generator that yields PCM audio data.
-    """
-    num_padding_frames = int(padding_duration_ms / frame_duration_ms)
-    print("num_padding_frames: %s" % num_padding_frames)
-    # We use a deque for our sliding window/ring buffer.
-    ring_buffer = collections.deque(maxlen=num_padding_frames)
-    # We have two states: TRIGGERED and NOTTRIGGERED. We start in the
-    # NOTTRIGGERED state.
-    triggered = False
-
-    voiced_frames = []
-    for frame in frames:
-        is_speech = vad.is_speech(frame.bytes, sample_rate)
-
-        sys.stdout.write('1' if is_speech else '0')
-        if not triggered:
-            ring_buffer.append((frame, is_speech))
-            num_voiced = len([f for f, speech in ring_buffer if speech])
-            # If we're NOTTRIGGERED and more than 90% of the frames in
-            # the ring buffer are voiced frames, then enter the
-            # TRIGGERED state.
-            if num_voiced > 0.9 * ring_buffer.maxlen:
-                triggered = True
-                sys.stdout.write('+(%s)' % (ring_buffer[0][0].timestamp,))
-                # We want to yield all the audio we see from now until
-                # we are NOTTRIGGERED, but we have to start with the
-                # audio that's already in the ring buffer.
-                for f, s in ring_buffer:
-                    voiced_frames.append(f)
-                ring_buffer.clear()
-        else:
-            # We're in the TRIGGERED state, so collect the audio data
-            # and add it to the ring buffer.
-            voiced_frames.append(frame)
-            ring_buffer.append((frame, is_speech))
-            num_unvoiced = len([f for f, speech in ring_buffer if not speech])
-            # If more than 90% of the frames in the ring buffer are
-            # unvoiced, then enter NOTTRIGGERED and yield whatever
-            # audio we've collected.
-            if num_unvoiced > 0.9 * ring_buffer.maxlen:
-                sys.stdout.write('-(%s)' % (frame.timestamp + frame.duration))
-                triggered = False
-                yield b''.join([f.bytes for f in voiced_frames])
-                ring_buffer.clear()
-                voiced_frames = []
-    if triggered:
-        sys.stdout.write('-(%s)' % (frame.timestamp + frame.duration))
-    sys.stdout.write('\n')
-    # If we have any leftover voiced audio when we run out of input,
-    # yield it.
-    if voiced_frames:
-        yield b''.join([f.bytes for f in voiced_frames])
+def save_split_files(split_dir, file_name, framess, sample_rate):
+    pre = file_name.split("/")[-1][:-4]
+    i = 0
+    for frames in framess:
+        file_name = pre + "%03d.wav" % i
+        print(file_name)
+        i += 1
+        dest = os.path.join(split_dir, file_name)
+        print(dest)
+        wave_data = b""
+        for frame in frames:
+            wave_data += frame.bytes
+        write_wave(dest, wave_data, sample_rate)
+    return
 
 
 def main(args):
     if len(args) != 2:
         sys.stderr.write(
-            'Usage: example.py <aggressiveness> <path to wav file>\n')
+            'Usage: example.py <dir to mono> <dir to data>\n')
         sys.exit(1)
-    audio, sample_rate = read_wave(args[1])
-    vad = webrtcvad.Vad(int(args[0]))
-    frames = frame_generator(30, audio, sample_rate)
-    frames = list(frames)
-    vad_dding(vad, frames, sample_rate)
-    print("frames: %s" % len(_voice_frames))
+
+    if not os.path.isdir(args[0]):
+        sys.stderr.write('Not dir\n')
+        sys.exit(1)
+
+    if not os.path.isdir(args[1]):
+        sys.stderr.write('Not dir\n')
+        sys.exit(1)
+
+    vad = webrtcvad.Vad(0)
+    wave_files = get_wave_files(args[0])
+    for wave_file in wave_files:
+        global _voice_frames
+        _voice_frames = []
+        audio, sample_rate = read_wave(wave_file)
+        frames = frame_generator(30, audio, sample_rate)
+        frames = list(frames)
+        vad_dding(vad, frames, sample_rate)
+        save_split_files(args[1], wave_file, _voice_frames, sample_rate)
+        print("frames: %s" % len(_voice_frames))
+    
     # segments = vad_collector(sample_rate, 30, 300, vad, frames)
     # for i, segment in enumerate(segments):
     #     path = 'chunk-%002d.wav' % (i,)
