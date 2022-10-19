@@ -45,7 +45,7 @@ def generate_text_file(origin):
             line = line.strip()
             line = remove_punctuation(line)
             line = convert_pinyin(line)
-            new_line = "%s_%03d.wav|%s" % (audio_prefix, i, line)
+            new_line = "audio_material/data/audio/%s_%03d.wav|%s" % (audio_prefix, i, line)
             i += 1
             print(new_line)
             _lines.append(new_line)
