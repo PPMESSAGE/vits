@@ -29,16 +29,15 @@ def convert_pinyin(line):
 
 def get_text_files(wave_dir):
     files = os.listdir(wave_dir)
-    print(files)
     files = filter(lambda f: f[-4:] == ".txt", files)
     files = list(files)
     files = list(map(lambda f: os.path.join(wave_dir, f), files))
+    files.sort()
     return files
 
-def generate_text_file(origin, dest_dir):
+def generate_text_file(origin):
     audio_prefix = "%s_mono_16000" % origin.split("/")[-1][:-4]
-    print(audio_prefix)
-
+    _lines = []
     i = 0
     with open(origin) as _f:
         for line in _f.readlines():
@@ -49,27 +48,23 @@ def generate_text_file(origin, dest_dir):
             new_line = "%s_%03d.wav|%s" % (audio_prefix, i, line)
             i += 1
             print(new_line)
-        #print(_f.read())
-    return
+            _lines.append(new_line)
+    return _lines
 
 def main(args):
-    if len(args) != 2:
+    if len(args) != 1:
         sys.stderr.write(
-            'Usage: example.py <dir to text> <dir to data>\n')
+            'Usage: example.py <dir to text>\n')
         sys.exit(1)
 
     if not os.path.isdir(args[0]):
         sys.stderr.write('Not dir\n')
         sys.exit(1)
 
-    if not os.path.isdir(args[1]):
-        sys.stderr.write('Not dir\n')
-        sys.exit(1)
-
     _files = get_text_files(args[0])
-    
+
     for _file in _files:
-        generate_text_file(_file, args[1])
+        _lines = generate_text_file(_file)
             
         
 

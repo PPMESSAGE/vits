@@ -154,7 +154,7 @@ def save_split_files(split_dir, file_name, framess, sample_rate):
     pre = file_name.split("/")[-1][:-4]
     i = 0
     for frames in framess:
-        file_name = pre + "%03d.wav" % i
+        file_name = pre + "_%03d.wav" % i
         print(file_name)
         i += 1
         dest = os.path.join(split_dir, file_name)
