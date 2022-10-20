@@ -1,12 +1,15 @@
 """ from https://github.com/keithito/tacotron """
 from text import cleaners
 from text.symbols import symbols
+from text.pinyin_symbols import pinyin_symbols
 
 
 # Mappings from symbol to numeric ID and vice versa:
-_symbol_to_id = {s: i for i, s in enumerate(symbols)}
-_id_to_symbol = {i: s for i, s in enumerate(symbols)}
+#_symbol_to_id = {s: i for i, s in enumerate(symbols)}
+#_id_to_symbol = {i: s for i, s in enumerate(symbols)}
 
+_symbol_to_id = {s: i for i, s in enumerate(pinyin_symbols)}
+_id_to_symbol = {i: s for i, s in enumerate(pinyin_symbols)}
 
 def text_to_sequence(text, cleaner_names):
   '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
