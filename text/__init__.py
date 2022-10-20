@@ -28,6 +28,7 @@ def text_to_sequence(text, cleaner_names):
   return sequence
 
 
+import re
 def cleaned_text_to_sequence(cleaned_text):
   '''Converts a string of text to a sequence of IDs corresponding to the symbols in the text.
     Args:
@@ -35,7 +36,13 @@ def cleaned_text_to_sequence(cleaned_text):
     Returns:
       List of integers corresponding to the symbols in the text
   '''
+  
+  #print(cleaned_text)
+  #cleaned_text = re.split(r'\s+', cleaned_text)
+  cleaned_text = cleaned_text.split(" ")
+  #print(cleaned_text)
   sequence = [_symbol_to_id[symbol] for symbol in cleaned_text]
+  #print(sequence)
   return sequence
 
 

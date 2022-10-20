@@ -215,4 +215,4 @@ finals = [
     "vn4",
     "vn5",
 ]
-pinyin_symbols = initials + finals + ["rr"] + [" "]
+pinyin_symbols = initials + finals + ["rr"] + [" "] + [""]

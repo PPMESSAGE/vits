@@ -3,8 +3,8 @@
     "log_interval": 200,
     "eval_interval": 1000,
     "seed": 1234,
-    "epochs": 20000,
-    "learning_rate": 2e-4,
+    "epochs": 40000,
+    "learning_rate": 1e-4,
     "betas": [0.8, 0.99],
     "eps": 1e-9,
     "batch_size": 8,
@@ -33,8 +33,8 @@
     "cleaned_text": true
   },
   "model": {
-    "inter_channels": 192,
-    "hidden_channels": 192,
+    "inter_channels": 256,
+    "hidden_channels": 256,
     "filter_channels": 768,
     "n_heads": 2,
     "n_layers": 6,
