@@ -5,6 +5,7 @@ import wave
 import os
 
 import pypinyin
+import pinyin_symbols
 
 def remove_punctuation(line):
     line = line.replace("，", " ")
@@ -13,18 +14,47 @@ def remove_punctuation(line):
     line = line.replace("、", " ")
     line = line.replace("；", " ")
     line = line.replace("：", " ")
+    line = line.replace("！", " ")
+    line = line.replace("“", " ")
+    line = line.replace("”", " ")
+    line = line.replace("‘", " ")
+    line = line.replace("’", " ")
 
     line = line.replace(",", " ")
     line = line.replace(".", " ")
     line = line.replace("?", " ")
     line = line.replace(";", " ")
     line = line.replace(":", " ")
+    line = line.replace("!", " ")
+    line = line.replace("\"", " ")
+    line = line.replace("'", " ")
 
     return line
 
+_MAX = 0
 def convert_pinyin(line):
-    p = pypinyin.lazy_pinyin(line, style=pypinyin.Style.TONE2,
-                             neutral_tone_with_five=True, errors=lambda x: " ")
+    #p = pypinyin.lazy_pinyin(line, style=pypinyin.Style.TONE2,
+    #                         neutral_tone_with_five=True, errors=lambda x: " ")
+    p = []
+    for w in line:
+        x = pypinyin.lazy_pinyin(w, style=pypinyin.Style.INITIALS, errors=lambda x: " ")
+        if x and x[0]:
+            #print(x)
+            assert(x[0] in pinyin_symbols.pinyin_symbols)
+            p.append(x[0])
+        x = pypinyin.lazy_pinyin(w, style=pypinyin.Style.FINALS_TONE3,
+                neutral_tone_with_five=True, errors=lambda x: " ")
+        
+        if x and x[0]:
+            #print(x)
+            assert(x[0] in pinyin_symbols.pinyin_symbols)
+            p.append(x[0])
+
+    # 256
+    #global _MAX
+    #if len(p) > _MAX:
+    #    _MAX = len(p)
+    #    print("MAX >>>>>>>>>>>>>> %d" % _MAX)
     return " ".join(p)
 
 def get_text_files(wave_dir):

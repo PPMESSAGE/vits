@@ -184,6 +184,11 @@ finals = [
     "uen3",
     "uen4",
     "uen5",
+    "ueng1",
+    "ueng2",
+    "ueng3",
+    "ueng4",
+    "ueng5",
     "uo1",
     "uo2",
     "uo3",
@@ -210,4 +215,4 @@ finals = [
     "vn4",
     "vn5",
 ]
-valid_symbols = initials + finals + ["rr"]
+pinyin_symbols = initials + finals + ["rr"] + [" "]
