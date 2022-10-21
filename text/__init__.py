@@ -40,8 +40,22 @@ def cleaned_text_to_sequence(cleaned_text):
   #print(cleaned_text)
   #cleaned_text = re.split(r'\s+', cleaned_text)
   cleaned_text = cleaned_text.split(" ")
+  _is_blank = False
+  _shrinked = []
+  for i in cleaned_text:
+    if i == "" or i == " ":
+        if _is_blank:
+            continue
+        else:
+            _is_blank = True
+    else:
+        if _is_blank:
+            _is_blank = False
+    _shrinked.append(i)
+  #print(_shrinked)
   #print(cleaned_text)
-  sequence = [_symbol_to_id[symbol] for symbol in cleaned_text]
+  #sequence = [_symbol_to_id[symbol] for symbol in cleaned_text]
+  sequence = [_symbol_to_id[symbol] for symbol in _shrinked]
   #print(sequence)
   return sequence
 
