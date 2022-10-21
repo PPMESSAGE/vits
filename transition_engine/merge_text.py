@@ -36,26 +36,38 @@ def convert_pinyin(line):
     #p = pypinyin.lazy_pinyin(line, style=pypinyin.Style.TONE2,
     #                         neutral_tone_with_five=True, errors=lambda x: " ")
     p = []
-    for w in line:
-        x = pypinyin.lazy_pinyin(w, style=pypinyin.Style.INITIALS, errors=lambda x: " ")
-        if x and x[0]:
-            #print(x)
-            assert(x[0] in pinyin_symbols.pinyin_symbols)
-            p.append(x[0])
-        x = pypinyin.lazy_pinyin(w, style=pypinyin.Style.FINALS_TONE3,
-                neutral_tone_with_five=True, errors=lambda x: " ")
-        
-        if x and x[0]:
-            #print(x)
-            assert(x[0] in pinyin_symbols.pinyin_symbols)
-            p.append(x[0])
+    x = pypinyin.lazy_pinyin(line, style=pypinyin.Style.INITIALS,
+            strict=False, errors=lambda x: " ")
+    #assert(x[0] in pinyin_symbols.pinyin_symbols)
+    y = pypinyin.lazy_pinyin(line, style=pypinyin.Style.FINALS_TONE3,
+            strict=True, neutral_tone_with_five=True, errors=lambda x: " ")
+    
+    #assert(x[0] in pinyin_symbols.pinyin_symbols)
+    assert(len(x) == len(y))
+    for i in range(len(x)):
+        p.append(x[i])
+        p.append(y[i])
 
+    q = []
+    _is_blank = False
+    for i in p:
+        if i == "" or i == " ":
+            if _is_blank == False:
+                _is_blank = True
+            if _is_blank == True:
+                continue
+        else:
+            if _is_blank == True:
+                _is_blank = False
+        q.append(i)
+
+    #print(q)
     # 256
     #global _MAX
     #if len(p) > _MAX:
     #    _MAX = len(p)
     #    print("MAX >>>>>>>>>>>>>> %d" % _MAX)
-    return " ".join(p)
+    return " ".join(q)
 
 def get_text_files(wave_dir):
     files = os.listdir(wave_dir)

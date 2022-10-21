@@ -17,7 +17,7 @@ def get_train_valid(audio_txt):
             _lines.append(_line)
             
             if len(_lines) == 10:
-                _v = random.choices(_lines, k=2)
+                _v = random.choices(_lines, k=1)
                 _t = list(filter(lambda x: x not in _v, _lines))
                 _train += _t
                 _valid += _v
