@@ -42,34 +42,45 @@ def convert_pinyin(line):
     p = []
     x = pypinyin.lazy_pinyin(line, style=pypinyin.Style.INITIALS,
                              strict=False,
+                             #strict=True,
                              errors=lambda x: "#2" if x != "#1" else "#1")
-    assert(x[0] in pinyin_symbols.pinyin_symbols)
+    #print(line)
+    #print(x)
+    assert(x[0] in pinyin_symbols)
     y = pypinyin.lazy_pinyin(line, style=pypinyin.Style.FINALS_TONE3,
                              strict=True,
                              neutral_tone_with_five=True,
                              errors=lambda x: "#2" if x != "#1" else "#1")
     
-    assert(x[0] in pinyin_symbols.pinyin_symbols)
+    #print(x)
+    assert(x[0] in pinyin_symbols)
     assert(len(x) == len(y))
     for i in range(len(x)):
-        p.append(x[i])
-        p.append(y[i])
-        p.append("#0")
+        if x[i] == "":
+            p.append("^")
+        else:
+            p.append(x[i])
+        if x[i] == "#1" or x[i] == "#2":
+            pass
+        else:
+            p.append(y[i])
+            p.append("#0")
     p.append("#sil")
     p.append("#eos")
 
-    q = []
-    _is_blank = False
-    for i in p:
-        if i == "#1" or i == "#2" or i == "#0":
-            if _is_blank == False:
-                _is_blank = True
-            if _is_blank == True:
-                continue
-        else:
-            if _is_blank == True:
-                _is_blank = False
-        q.append(i)
+    return " ".join(p)
+    #q = []
+    #_is_blank = False
+    #for i in p:
+    #    if i == "#1" or i == "#2" or i == "#0":
+    #        if _is_blank == False:
+    #            _is_blank = True
+    #        if _is_blank == True:
+    #            continue
+    #    else:
+    #        if _is_blank == True:
+    #            _is_blank = False
+    #    q.append(i)
 
     #print(q)
     # 256
@@ -77,7 +88,7 @@ def convert_pinyin(line):
     #if len(p) > _MAX:
     #    _MAX = len(p)
     #    print("MAX >>>>>>>>>>>>>> %d" % _MAX)
-    return " ".join(q)
+    #return " ".join(q)
 
 def get_text_files(wave_dir):
     files = os.listdir(wave_dir)
