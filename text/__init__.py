@@ -1,6 +1,5 @@
 """ from https://github.com/keithito/tacotron """
 from text import cleaners
-from text.symbols import symbols
 from text.pinyin_symbols import pinyin_symbols
 
 
