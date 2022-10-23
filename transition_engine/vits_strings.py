@@ -30,7 +30,7 @@ def save_wav(wav, path, rate):
 
 def get_text_ids(phones, hps):
     text_norm = cleaned_text_to_sequence(phones)
-    text_norm = commons.intersperse(text_norm, 0)
+    #text_norm = commons.intersperse(text_norm, 0)
     text_norm = torch.LongTensor(text_norm)
     return text_norm
 
