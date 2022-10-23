@@ -1,6 +1,7 @@
 import os
 import json
 import argparse
+import datetime
 import itertools
 import math
 import torch
@@ -229,7 +230,7 @@ def train_and_evaluate(rank, epoch, hps, nets, optims, schedulers, scaler, loade
     global_step += 1
   
   if rank == 0:
-    logger.info('====> Epoch: {}'.format(epoch))
+    logger.info('{} ====> Epoch: {}'.format(datetime.datetime.now(), epoch))
 
  
 def evaluate(hps, generator, eval_loader, writer_eval):
