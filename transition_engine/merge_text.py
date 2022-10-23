@@ -5,29 +5,33 @@ import wave
 import os
 
 import pypinyin
-import pinyin_symbols
+
+sys.path.append('..')
+from text import pinyin_symbols
+
 
 def remove_punctuation(line):
-    line = line.replace("，", " ")
-    line = line.replace("。", " ")
-    line = line.replace("？", " ")
-    line = line.replace("、", " ")
-    line = line.replace("；", " ")
-    line = line.replace("：", " ")
-    line = line.replace("！", " ")
-    line = line.replace("“", " ")
-    line = line.replace("”", " ")
-    line = line.replace("‘", " ")
-    line = line.replace("’", " ")
+    punc = "#1"
+    line = line.replace("，", punc)
+    line = line.replace("。", punc)
+    line = line.replace("？", punc)
+    line = line.replace("、", punc)
+    line = line.replace("；", punc)
+    line = line.replace("：", punc)
+    line = line.replace("！", punc)
+    line = line.replace("“", punc)
+    line = line.replace("”", punc)
+    line = line.replace("‘", punc)
+    line = line.replace("’", punc)
 
-    line = line.replace(",", " ")
-    line = line.replace(".", " ")
-    line = line.replace("?", " ")
-    line = line.replace(";", " ")
-    line = line.replace(":", " ")
-    line = line.replace("!", " ")
-    line = line.replace("\"", " ")
-    line = line.replace("'", " ")
+    line = line.replace(",", punc)
+    line = line.replace(".", punc)
+    line = line.replace("?", punc)
+    line = line.replace(";", punc)
+    line = line.replace(":", punc)
+    line = line.replace("!", punc)
+    line = line.replace("\"", punc)
+    line = line.replace("'", punc)
 
     return line
 
@@ -37,21 +41,27 @@ def convert_pinyin(line):
     #                         neutral_tone_with_five=True, errors=lambda x: " ")
     p = []
     x = pypinyin.lazy_pinyin(line, style=pypinyin.Style.INITIALS,
-            strict=False, errors=lambda x: " ")
-    #assert(x[0] in pinyin_symbols.pinyin_symbols)
+                             strict=False,
+                             errors=lambda x: "#2" if x != "#1" else "#1")
+    assert(x[0] in pinyin_symbols.pinyin_symbols)
     y = pypinyin.lazy_pinyin(line, style=pypinyin.Style.FINALS_TONE3,
-            strict=True, neutral_tone_with_five=True, errors=lambda x: " ")
+                             strict=True,
+                             neutral_tone_with_five=True,
+                             errors=lambda x: "#2" if x != "#1" else "#1")
     
-    #assert(x[0] in pinyin_symbols.pinyin_symbols)
+    assert(x[0] in pinyin_symbols.pinyin_symbols)
     assert(len(x) == len(y))
     for i in range(len(x)):
         p.append(x[i])
         p.append(y[i])
+        p.append("#0")
+    p.append("#sil")
+    p.append("#eos")
 
     q = []
     _is_blank = False
     for i in p:
-        if i == "" or i == " ":
+        if i == "#1" or i == "#2" or i == "#0":
             if _is_blank == False:
                 _is_blank = True
             if _is_blank == True:
