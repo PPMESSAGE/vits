@@ -103,7 +103,9 @@ def _pre_n_status(is_speech, frame):
         _silence.append(frame)
         _keep.append(frame)
         if len(_silence) > _S_INTERVAL_FRAME:
-            _voice_frames.append(_keep)
+            if len(_keep) > _S_INTERVAL_FRAME:
+                _keep = _keep[:-_S_INTERVAL_FRAME]
+                _voice_frames.append(_keep)
             _keep = []
             return "NULL"
         else:
