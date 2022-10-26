@@ -215,4 +215,4 @@ finals = [
     "vn4",
     "vn5",
 ]
-pinyin_symbols = ["_", "", " ", "^"] + initials + finals + ["rr"] + ["#0", "#1", "#2"] + ["#sil", "#eos"]
+pinyin_symbols = ["_", "", " ", "^"] + initials + finals + ["rr"] + ["#0", "#1", "#2", "#3"] + ["#sil", "#sos", "#eos"]

@@ -39,6 +39,7 @@ def get_text_ids(phones, hps):
     text_norm = torch.LongTensor(text_norm)
     return text_norm
 
+
 net_g = SynthesizerTrn(
     len(pinyin_symbols),
     hps.data.filter_length // 2 + 1,
@@ -48,9 +49,9 @@ _ = net_g.eval()
 
 _ = utils.load_checkpoint("../logs/tr_base/latest.pth", net_g, None)
 
-if __name__ == "__main__":
-    print("===============================================================")
-    phonemes = chinese_to_phonemes(sys.argv[1])
+
+def _main(text):
+    phonemes = chinese_to_phonemes(text)
     input_ids = get_text_ids(phonemes, hps)
 
     print(datetime.datetime.now())
@@ -68,7 +69,19 @@ if __name__ == "__main__":
     print("hat_length", y_hat_lengths)
     audio = y_hat[0,:,:y_hat_lengths[0]].numpy()[0]
     print("audio", audio)
-    save_wav(audio, "./vits_out/" + sys.argv[2], hps.data.sampling_rate)
+    #save_wav(audio, "./vits_out/" + sys.argv[2], hps.data.sampling_rate)
 
     print(phonemes)
     print(input_ids)
+    print(type(audio))
+    return audio
+
+
+if __name__ == "__main__":
+    print("===============================================================")
+    _texts = sys.argv[1].split("[p300]")
+    _audios = np.array([])
+    for text in _texts:
+        _audios = np.concatenate((_audios, _main(text)))
+    save_wav(_audios, "./vits_out/baker.wav", hps.data.sampling_rate)
+    ""

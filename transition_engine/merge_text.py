@@ -39,7 +39,7 @@ _MAX = 0
 def convert_pinyin(line):
     #p = pypinyin.lazy_pinyin(line, style=pypinyin.Style.TONE2,
     #                         neutral_tone_with_five=True, errors=lambda x: " ")
-    p = []
+    p = ["#sos"]
     x = pypinyin.lazy_pinyin(line, style=pypinyin.Style.INITIALS,
                              strict=False,
                              #strict=True,
@@ -64,7 +64,7 @@ def convert_pinyin(line):
             pass
         else:
             p.append(y[i])
-            p.append("#0")
+            p.append("#3")
     p.append("#sil")
     p.append("#eos")
 
