@@ -3,6 +3,7 @@ import contextlib
 import sys
 import wave
 import os
+from struct import unpack
 
 import webrtcvad
 
@@ -67,11 +68,12 @@ def frame_generator(frame_duration_ms, audio, sample_rate):
 
 # =========================================
 
-_V_INTERVAL_FRAME = 24
+_V_INTERVAL_FRAME = 15
 _S_INTERVAL_FRAME = 33
 _keep = []
 _silence = []
 _voice_frames = []
+
 
 def _null_status(is_speech, frame):
     global _keep
@@ -104,9 +106,10 @@ def _pre_n_status(is_speech, frame):
         _keep.append(frame)
         if len(_silence) > _S_INTERVAL_FRAME:
             if len(_keep) > _S_INTERVAL_FRAME:
-                _keep = _keep[:-_S_INTERVAL_FRAME]
+                _keep = _keep[:-(_S_INTERVAL_FRAME+2)]
                 _voice_frames.append(_keep)
             _keep = []
+            _silence = []
             return "NULL"
         else:
             return "PRE_N"
@@ -152,19 +155,51 @@ def get_wave_files(wave_dir):
     files = list(map(lambda f: os.path.join(wave_dir, f), files))
     return files
 
+def _is_silence_wave(wave_data, sample_rate):
+    x = 0.0
+    tuple_of_shorts = unpack('<'+'h'*(len(wave_data)//2),wave_data)
+    for d in tuple_of_shorts:
+        x = x + float(abs(d))
+    if x/len(wave_data) < 99:
+        return True
+    return False
+
+def _remove_tail_blank(filename, wave_data, sample_rate):
+    tuple_of_shorts = unpack('<'+'h'*(len(wave_data)//2),wave_data)
+    tuple_of_shorts = list(reversed(tuple_of_shorts))
+    i = 0
+    _acc = 0
+    for d in tuple_of_shorts:
+        if abs(d) > 128:
+            if _acc > 3:
+                break
+            else:
+                _acc += 1
+        else:
+            i += 1
+
+    if i > 0 and i > 32:
+
+        wave_data = wave_data[:-2*i+64]
+        #wave_data += b''.join([b'0' for i in range(int(sample_rate/100))]) 
+    return wave_data
+
 def save_split_files(split_dir, file_name, framess, sample_rate):
     pre = file_name.split("/")[-1][:-4]
     i = 0
     for frames in framess:
         file_name = pre + "_%03d.wav" % i
-        print(file_name)
-        i += 1
         dest = os.path.join(split_dir, file_name)
         print(dest)
         wave_data = b""
         for frame in frames:
             wave_data += frame.bytes
+        if _is_silence_wave(wave_data, sample_rate):
+            continue
+
+        wave_data = _remove_tail_blank(file_name, wave_data, sample_rate)
         write_wave(dest, wave_data, sample_rate)
+        i += 1
     return
 
 

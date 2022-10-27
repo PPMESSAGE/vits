@@ -65,7 +65,7 @@ def convert_pinyin(line):
         else:
             p.append(y[i])
             p.append("#3")
-    p.append("#sil")
+    #p.append("#sil")
     p.append("#eos")
 
     return " ".join(p)
