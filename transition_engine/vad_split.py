@@ -178,8 +178,8 @@ def _remove_tail_blank(filename, wave_data, sample_rate):
         else:
             i += 1
 
-    if i > 0 and i > 1024:
-        wave_data = wave_data[:-2*i+2048]
+    if i > 0 and i > 2048:
+        wave_data = wave_data[:-2*i+4096]
     return wave_data
 
 def save_split_files(split_dir, file_name, framess, sample_rate):
